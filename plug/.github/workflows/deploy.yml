@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+    push:
+        branches:
+            -plug
+
+jobs:
+    deploy:
+        runs-on: ubuntu-laters
+        steps:
+        -user: actions/checkout@v2
+        #Seup key
+        -run: set -eu
+        -run: mkdir "$HOME/.ssh"
+        -run echo "${{ secret.key}}" > "$HOME/.ssh/key"
+        -run chmod 600 "HOME/.ssh/key"
+        #Build
+        run: npm ci
+        run:npm run build
+        #Deploy
+        -run:cd app && rsynk -e "ssh -p 2022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete .
